@@ -10,11 +10,8 @@
     <p>{{ car1.make }}</p>
     <p>{{ car1.model }}</p>
     <p>{{ car1.stringify('WORKS') }}</p>
-    {% for a in dict %}
+    {% for a in arr %}
         <p>{{ a }}</p>
-        <p>{{ a['Name'].First }}</p>
-        <p>{{ a['Name']['Last'] }}</p>
-        <p>{{ a['Name'] }}</p>
     {% endfor %}
 </body>
 </html>

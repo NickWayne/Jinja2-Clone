@@ -47,6 +47,7 @@ class Parser(object):
             else:
                 out.write(self.insertParameter(line))
         else:
+            # Not control flow and render is off
             out.write("\n")
 
     def controlFlow(self, line: str):

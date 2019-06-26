@@ -14,4 +14,4 @@ def evalVars(var: str):
             var = ""
     return lst
 
-print(evalVars("test.apple['total']['gosh'].wow"))
+print(evalVars("test.apple['total money']['gosh'].wow['please']"))
