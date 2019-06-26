@@ -1,5 +1,5 @@
 from pipes import Pipes
-class Rubic2(Object):
+class Rubic2(object):
 
     def __init__(self, vars: dict):
         self.vars = vars # all local variables
@@ -27,20 +27,14 @@ class Rubic2(Object):
     def ruleParser(self, line: str, out):
         if (line.find("{%") != -1):
             self.controlFlow(line.strip()[2:-2])
-            out.write("\n")
         elif (self.render):
-            if (self.loop): # TODO Add true range support
+            if (self.loop):
                 self.loopLines.append(line)
             elif (len(self.loopLines) != 0):
-                if (isinstance(self.loopData, int)):
-                    for i in range(self.loopData):
-                        for line in self.loopLines:
-                            out.write(self.bindExpressions(line))
-                else:
-                    for data in self.loopData:
-                        self.vars[self.loopVar] = data
-                        for line in self.loopLines:
-                            out.write(self.bindExpressions(line))
+                for data in self.loopData:
+                    self.vars[self.loopVar] = data
+                    for line in self.loopLines:
+                        out.write(self.bindExpressions(line))
                 self.loopLines = [] # Clear looped lines 
             else:
                 out.write(self.bindExpressions(line))
@@ -62,15 +56,15 @@ class Rubic2(Object):
             return
         elif (line.find("for") != -1 ):
             self.loop = True
-            ran = line.find("range(")
-            if ran != -1:
-                self.loopData = int(line[ran+6 : line.find(")")])
+            if line.find("range(") != -1:
+                params = self.parseRange(line.strip())
+                self.loopData = range(*params)
             else: 
                 # Grab the var that the for loop is looping over
                 data = line[line.find("in ")+2 : line.find("}")].strip()
                 self.loopData = self.varLookup(data)
                 # Grab the variable name of the for loop
-                self.loopVar = line[line.find("for ") + 4 : line.find("in")].strip()
+            self.loopVar = line[line.find("for ") + 4 : line.find("in")].strip()
             
     def bindExpressions(self, line: str):
         lst = []
@@ -96,7 +90,7 @@ class Rubic2(Object):
     def varLookup(self, var: str):
         pipes = var.split("|")
         var = pipes[0].strip()
-        if (len(pipes > 1)):
+        if (len(pipes) > 1):
             pipes.pop(0) # Removes the variable from the pipes list
             pipes = map(str.strip, pipes)
             return self.applyPipes(self.expandDotBracketNotation(var), pipes)
@@ -126,9 +120,9 @@ class Rubic2(Object):
                 # Add the rest and empty the string
                 lst.append(var)
                 var = ""
-        return objectCLassExpansion(lst)
+        return self.objectClassExpansion(lst)
 
-    def objectCLassExpansion(self, lst):
+    def objectClassExpansion(self, lst):
         # Local var to hold the varlist to be mutated
         data = self.vars
         for atr in lst:
@@ -150,10 +144,15 @@ class Rubic2(Object):
                 data = data[atr]
         return data
 
-    def parseArguments(self, args):
+    def parseRange(self, args):
+        args = list(map(int, args[args.find("(")+1:-1].split(",")))
+        return args
+
+    def parseArguments(self, args, keepFirst = False):
         # Split the argument list and strip the values
         args = list(map(str.strip, args[args.find("(")+1:-1].split(",")))
-        if (len(args) == 1 and args[0] == ''):
+        print(args)
+        if (len(args) == 1 and args[0] == '' and not keepFirst):
             # No arguments so return empty list
             return []
         else:
