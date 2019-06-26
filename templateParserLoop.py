@@ -1,4 +1,4 @@
-import re
+import re, inspect
 from pipes import Pipes
 
 class Parser(object):
@@ -95,20 +95,48 @@ class Parser(object):
             pipes = var.split("|")
             var = pipes[0].strip()
             pipes.pop(0)
-        if (self.vars.get(var) != None):
-            return self.applyPipes(eval(var, self.vars), map(str.strip, pipes))
-            return self.applyPipes(self.evalVars(var), map(str.strip, pipes))
-        else:
-            return None
+        return self.applyPipes(self.evalVars(var), map(str.strip, pipes))
 
-    # def evalVars(var: str):
-    #     lst = []
-    #     while var != "":
-    #         dot = var.find(".")
-    #         bracket = var.find("[")
-    #         if (dot != -1 and dot < bracket):
-            
-    #         elif (bracket !=)
+    def evalVars(self, var: str):
+        lst = []
+        while var != "":
+            dot = var.find(".")
+            bracket = var.find("[")
+            if ((dot != -1 and dot < bracket) or (dot != -1 and bracket == -1)):
+                lst.append(var[:dot])
+                var = var[dot+1:]
+            elif ((bracket != -1 and bracket < dot)  or (bracket != -1 and dot == -1)):
+                lst.append(var[:bracket])
+                var = var[bracket+2:var.find("]")-1] + var[var.find("]")+1:]
+            else:
+                lst.append(var)
+                var = ""
+        data = self.vars
+        for atr in lst:
+            if (isinstance(data, object) and atr != lst[0] and not isinstance(data, dict)):
+                if (atr.find("(") != -1):
+                    args = self.parseArguments(atr)
+                    func = getattr(data, atr[:atr.find("(")])
+                    print(args)
+                    data = func(*args)
+                else:
+                    data = getattr(data,atr)
+            else:
+                data = data[atr]
+        return data
+
+    def parseArguments(self, args):
+        args = list(map(str.strip, args[args.find("(")+1:-1].split(",")))
+        if (len(args) == 1 and args[0] == ''):
+            return []
+        else:
+            argReturn = []
+            for arg in args:
+                if (arg.startswith("\"") or arg.startswith("'")):
+                    argReturn.append(arg[1:-1])
+                else:
+                    argReturn.append(self.varLookup(arg))
+            return argReturn
 
     def applyPipes(self, var, pipes):
         for pipe in pipes:

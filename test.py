@@ -1,14 +1,17 @@
-def insertParameter(line: str):
+def evalVars(var: str):
     lst = []
-    while line != "":
-        startIndex = line.find("{{")
-        if (startIndex != -1):
-            lst.append(line[:startIndex])
-            endIndex = line.find("}}")
-            lst.append(line[startIndex:endIndex+2])
-            line = line[endIndex+2:]
+    while var != "":
+        dot = var.find(".")
+        bracket = var.find("[")
+        if ((dot != -1 and dot < bracket) or (dot != -1 and bracket == -1)):
+            lst.append(var[:dot])
+            var = var[dot+1:]
+        elif ((bracket != -1 and bracket < dot)  or (bracket != -1 and dot == -1)):
+            lst.append(var[:bracket])
+            var = var[bracket+2:var.find("]")-1] + var[var.find("]")+1:]
         else:
-            lst.append(line)
-            line = ""
+            lst.append(var)
+            var = ""
+    return lst
 
-insertParameter("<p>Hello World! {{ arr | length}} elements in the array: {{arr}}</p>")
+print(evalVars("test.apple['total']['gosh'].wow"))
