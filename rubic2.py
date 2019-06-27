@@ -1,14 +1,16 @@
 from pipes import Pipes
+
+
 class Rubic2(object):
 
     def __init__(self, vars: dict):
-        self.vars = vars # all local variables
-        self.render = True # control flow render
-        self.loop = False # Inside a loop block, add lines
-        self.loopLines = [] # Lines inside loop block
-        self.loopData = "" # List, range
-        self.loopVar = "" # Loop Var Name
-        self.pipes = { # Pipe names mapped to the function
+        self.vars = vars  # all local variables
+        self.render = True  # control flow render
+        self.loop = False  # Inside a loop block, add lines
+        self.loopLines = []  # Lines inside loop block
+        self.loopData = ""  # List, range
+        self.loopVar = ""  # Loop Var Name
+        self.pipes = {  # Pipe names mapped to the function
             "split": Pipes.split,
             "length": Pipes.length,
             "str": Pipes.to_string,
@@ -22,7 +24,7 @@ class Rubic2(object):
     def parseDocument(self, document: str, output: str = "out.html"):
         with open(document, 'r') as template, open(output, 'w') as out:
             for line in template:
-                self.ruleParser(line, out) 
+                self.ruleParser(line, out)
 
     def ruleParser(self, line: str, out):
         if (line.find("{%") != -1):
@@ -35,7 +37,7 @@ class Rubic2(object):
                     self.vars[self.loopVar] = data
                     for line in self.loopLines:
                         out.write(self.bindExpressions(line))
-                self.loopLines = [] # Clear looped lines 
+                self.loopLines = []  # Clear looped lines
             else:
                 out.write(self.bindExpressions(line))
         else:
@@ -54,18 +56,18 @@ class Rubic2(object):
         if (self.loop and line.find("endfor") != -1):
             self.loop = False
             return
-        elif (line.find("for") != -1 ):
+        elif (line.find("for") != -1):
             self.loop = True
             if line.find("range(") != -1:
                 params = self.parseRange(line.strip())
                 self.loopData = range(*params)
-            else: 
+            else:
                 # Grab the var that the for loop is looping over
-                data = line[line.find("in ")+2 : line.find("}")].strip()
+                data = line[line.find("in ")+2: line.find("}")].strip()
                 self.loopData = self.varLookup(data)
                 # Grab the variable name of the for loop
-            self.loopVar = line[line.find("for ") + 4 : line.find("in")].strip()
-            
+            self.loopVar = line[line.find("for ") + 4: line.find("in")].strip()
+
     def bindExpressions(self, line: str):
         lst = []
         while line != "":
@@ -76,7 +78,8 @@ class Rubic2(object):
                 lst.append(line[:startIndex])
                 endIndex = line.find("}}")
                 # The expression itself, then remove curly braces and whitespace then replace the expression with it's value
-                lst.append(self.varLookup(line[startIndex:endIndex+2][2:-2].strip()))
+                lst.append(self.varLookup(
+                    line[startIndex:endIndex+2][2:-2].strip()))
                 # remove everything before the end of the expression from the line
                 line = line[endIndex+2:]
             # No more expressions left in the line
@@ -91,7 +94,7 @@ class Rubic2(object):
         pipes = var.split("|")
         var = pipes[0].strip()
         if (len(pipes) > 1):
-            pipes.pop(0) # Removes the variable from the pipes list
+            pipes.pop(0)  # Removes the variable from the pipes list
             pipes = map(str.strip, pipes)
             return self.applyPipes(self.expandDotBracketNotation(var), pipes)
         else:
@@ -108,8 +111,8 @@ class Rubic2(object):
                 lst.append(var[:dot])
                 # String becomes everything after the dot
                 var = var[dot+1:]
-            # Bracket notation closer than dot or bracket exists and dot doesn't            
-            elif ((bracket != -1 and bracket < dot)  or (bracket != -1 and dot == -1)):
+            # Bracket notation closer than dot or bracket exists and dot doesn't
+            elif ((bracket != -1 and bracket < dot) or (bracket != -1 and dot == -1)):
                 # Append everything before the bracket from string
                 lst.append(var[:bracket])
                 # String in the brackets gets expanded
@@ -138,7 +141,7 @@ class Rubic2(object):
                     data = func(*args)
                 else:
                     # Drill down into the data structure
-                    data = getattr(data,atr)
+                    data = getattr(data, atr)
             else:
                 # Drill down into the data structure
                 data = data[atr]
@@ -148,7 +151,7 @@ class Rubic2(object):
         args = list(map(int, args[args.find("(")+1:-1].split(",")))
         return args
 
-    def parseArguments(self, args, keepFirst = False):
+    def parseArguments(self, args, keepFirst=False):
         # Split the argument list and strip the values
         args = list(map(str.strip, args[args.find("(")+1:-1].split(",")))
         print(args)
