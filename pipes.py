@@ -19,3 +19,7 @@ class Pipes(object):
     @staticmethod
     def to_string(obj):
         return str(obj)
+
+    @staticmethod
+    def to_int(obj):
+        return int(obj)

@@ -15,7 +15,8 @@ class Rubic2(object):
             "length": Pipes.length,
             "str": Pipes.to_string,
             "max": Pipes.max,
-            "min": Pipes.min
+            "min": Pipes.min,
+            'int': Pipes.to_int
         }
 
     def updateVars(self, vars: dict):
