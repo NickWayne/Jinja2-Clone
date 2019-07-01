@@ -37,7 +37,8 @@ This project is not intended to be used but tot be a demonstration project. I wr
   - Example: ` {% for line in ["Line 1", "Line 2", "Line 3"] %} <p>{{ line }}</p> {% endif %} `
   
 ## Limitations
+- No nested for loops
+- Limited / inconsistent object reference and indexing
+- no tests
 
-## Bugs
-
-## Changelog
+## Change log
